@@ -46,7 +46,10 @@ object Methods {
             ActivityCompat.requestPermissions(Activity(), arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
             return ""
         }else{
-            return info.bssid
+            if(info.bssid != null)
+                return info.bssid
+            else
+                return info.macAddress
         }
     }
 
