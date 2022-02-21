@@ -55,7 +55,7 @@ class UserViewModel @Inject constructor(
 
     fun readDataFromFirebase(context: Context){
         list.clear()
-        myRef.child(Methods.getMacAddress(context)).addChildEventListener(object: ChildEventListener{
+        myRef.child(Methods.getMacAddress(context)).child("Location") .addChildEventListener(object: ChildEventListener{
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 funConvertValues(snapshot)
                 _LocationRecord.postValue(list)
@@ -81,16 +81,14 @@ class UserViewModel @Inject constructor(
     }
 
     fun funConvertValues(snapshot: DataSnapshot){
-        for (postSnapshot in snapshot.children) {
-            var str = postSnapshot.value.toString().replace(" ","").subSequence(1, postSnapshot.value.toString().length-2)
-            val map = str.split(",").associateTo(HashMap()) {
-                val (left, right) = it.split("=")
-                left to right
-            }
-            val strlat = map["Latitud"].toString()
-            val strLon = map["Longitud"].toString()
-            var location = LocationRecord(postSnapshot.key.toString(), strlat, strLon)
-            list.add(location)
+        var str = snapshot.value.toString().replace(" ","").subSequence(1, snapshot.value.toString().length-2)
+        val map = str.split(",").associateTo(HashMap()) {
+            val (left, right) = it.split("=")
+            left to right
         }
+        val strlat = map["Latitud"].toString()
+        val strLon = map["Longitud"].toString()
+        var location = LocationRecord(snapshot.key.toString(), strlat, strLon)
+        list.add(location)
     }
 }

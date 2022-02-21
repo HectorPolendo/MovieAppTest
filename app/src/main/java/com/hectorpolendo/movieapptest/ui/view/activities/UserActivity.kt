@@ -1,48 +1,42 @@
 package com.hectorpolendo.movieapptest.ui.view.activities
 
-import android.Manifest
-import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
-import android.view.View
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import com.hectorpolendo.movieapptest.adapters.LocationRecordAdapter
-import com.hectorpolendo.movieapptest.adapters.MostPopularMoviesAdapter
+import com.hectorpolendo.movieapptest.R
 import com.hectorpolendo.movieapptest.databinding.ActivityUserBinding
 import com.hectorpolendo.movieapptest.domain.models.LocationRecord
 import com.hectorpolendo.movieapptest.ui.viewmodel.UserViewModel
 import com.hectorpolendo.movieapptest.util.*
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import java.util.*
 import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
-class UserActivity : AppCompatActivity() {
+class UserActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityUserBinding
     private val userViewModel: UserViewModel by viewModels()
     private val database = Firebase.database
     private val myRef = database.getReference("Users")
-    private lateinit var locationRecordAdapter: LocationRecordAdapter
+    private lateinit var map: GoogleMap
+    private var locations = ArrayList<LocationRecord>()
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,18 +44,12 @@ class UserActivity : AppCompatActivity() {
         binding = ActivityUserBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        createFragment()
         if(!Methods.isOnline(this@UserActivity)){
             var dialog = CustomDialogFragment()
             dialog.show(supportFragmentManager, "customDialog")
         }else{
             userViewModel.onCreate()
-
-            locationRecordAdapter = LocationRecordAdapter()
-
-            binding.rvLocation.apply {
-                layoutManager = LinearLayoutManager(this@UserActivity, LinearLayoutManager.VERTICAL, false)
-                adapter = locationRecordAdapter
-            }
 
             binding.ivProfile.setOnClickListener {
                 if(Methods.hasPermissions(this)){
@@ -71,6 +59,11 @@ class UserActivity : AppCompatActivity() {
 
             subscribeObservers()
         }
+    }
+
+    private fun createFragment() {
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
     }
 
     private fun subscribeObservers() {
@@ -85,14 +78,8 @@ class UserActivity : AppCompatActivity() {
         userViewModel.readDataFromFirebase(this)
 
         userViewModel.locationRecord.observe(this, {
-            locationRecordAdapter.setLocations(it as ArrayList<LocationRecord>)
-            if(it == null){
-                binding.rvLocation.visibility = View.GONE
-                binding.constContainer.visibility = View.VISIBLE
-            }else{
-                binding.rvLocation.visibility = View.VISIBLE
-                binding.constContainer.visibility = View.GONE
-            }
+            locations = it as ArrayList<LocationRecord>
+            createMarker()
         })
     }
 
@@ -125,5 +112,20 @@ class UserActivity : AppCompatActivity() {
             Intent.createChooser(gallery, "Seleccione la app"),
             Constants.SELECT_PICTURE
         )
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        map = googleMap
+        createMarker()
+    }
+
+    private fun createMarker() {
+        if(!locations.isNullOrEmpty()){
+            locations.forEach {
+                val  coordinates = LatLng(it.latitude.toDouble(), it.longitude.toDouble())
+                val marker = MarkerOptions().position(coordinates).title(it.date)
+                map.addMarker(marker)
+            }
+        }
     }
 }

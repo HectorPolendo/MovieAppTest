@@ -2,7 +2,6 @@ package com.hectorpolendo.movieapptest.util
 
 import android.Manifest
 import android.app.Activity
-import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
