@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "439020455859",
+    "project_id": "movieapptest-b80f3",
+    "storage_bucket": "movieapptest-b80f3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:439020455859:android:3db9fd53b3f4e02cc36dc6",
+        "android_client_info": {
+          "package_name": "com.hectorpolendo.movieapptest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "439020455859-nahod8jtmmfug06nls50efdrr7hmulon.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBo9cNJn2mwdAe_l9fNXwiLo1lV9G2lNi4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "439020455859-nahod8jtmmfug06nls50efdrr7hmulon.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
